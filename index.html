@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS & Restoran Yönetim Sistemi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #0d102b;
+      color: #e2e8f0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .pos-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease-in-out;
+    }
+    .pos-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .pos-card:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 select-none">
+
+  <!-- Üst Bilgi Çubuğu -->
+  <header class="flex justify-between items-center bg-slate-900/60 p-3 rounded-2xl border border-white/10 mb-4 sm:mb-6">
+    <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Server</span> <span class="text-[10px] bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-300">ONLINE</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Internet</span> <span class="text-[10px] bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-300">ONLINE</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 text-right">
+      <div class="text-xs">
+        <div class="font-bold text-white tracking-wide">ALİ OSMAN BEY</div>
+        <div class="text-[10px] text-slate-400">YÖNETİCİ / ÖDEME NOKTASI</div>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-lg">
+        AO
+      </div>
+    </div>
+  </header>
+
+  <!-- ANA DASHBOARD (KUTUCUKLAR) -->
+  <main id="mainDashboard" class="flex-1 max-w-4xl mx-auto w-full flex flex-col justify-center my-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
+      
+      <!-- 1. Faturalar -->
+      <button onclick="openModule('faturalar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-105 transition text-2xl">📜</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Faturalar (KDV/İskonto)</span>
+      </button>
+
+      <!-- 2. Cariler -->
+      <button onclick="openModule('cariler')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition text-2xl">🏢</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Tedarikçi Carileri</span>
+      </button>
+
+      <!-- 3. Stok Sayımı -->
+      <button onclick="openModule('stoklar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition text-2xl">📦</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Stok Sayımı</span>
+      </button>
+
+      <!-- 4. Personel Listesi -->
+      <button onclick="openModule('personel')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-105 transition text-2xl">👥</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Personel Listesi</span>
+      </button>
+
+      <!-- 5. Maaş Takibi -->
+      <button onclick="openModule('maaslar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition text-2xl">💰</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Maaş Takibi</span>
+      </button>
+
+      <!-- 6. Raporlar & Giderler -->
+      <button onclick="openModule('raporlar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-pink-600 flex items-center justify-center shadow-lg shadow-fuchsia-500/30 group-hover:scale-105 transition text-2xl">📊</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Ay Sonu Raporu</span>
+      </button>
+
+      <!-- 7. Ayarlar -->
+      <button onclick="openModule('ayarlar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group col-span-2 sm:col-span-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-700 flex items-center justify-center shadow text-lg">⚙️</div>
+        <span class="font-bold text-xs text-slate-300">Sistem Ayarları (API Key)</span>
+      </button>
+
+    </div>
+  </main>
+
+  <!-- MODÜL İÇERİK EKRANI -->
+  <section id="moduleContent" class="hidden flex-1 max-w-4xl mx-auto w-full bg-slate-900/90 rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl flex flex-col">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+      <button onclick="closeModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-white/10">
+        ⬅️ Ana Menü
+      </button>
+      <h2 id="moduleTitle" class="text-sm sm:text-base font-bold text-white">Modül Başlığı</h2>
+    </div>
+    
+    <div id="moduleBody" class="flex-1 overflow-y-auto space-y-4 text-xs">
+      <!-- Dinamik İçerik -->
+    </div>
+  </section>
+
+  <!-- Alt Bilgi Çubuğu -->
+  <footer class="flex justify-between items-center text-[11px] text-slate-500 pt-3 border-t border-white/5">
+    <div>POS CENTURY v4.0</div>
+    <div id="clockDisplay" class="font-bold text-slate-400">--:--</div>
+  </footer>
+
+  <script>
+    let invoices = JSON.parse(localStorage.getItem('invoices_data_v2')) || [];
+    let suppliers = JSON.parse(localStorage.getItem('suppliers_data_v2')) || ['Kahve Sarayı', 'Uludağ', 'Leonaza Gıda'];
+    let staffList = JSON.parse(localStorage.getItem('staff_data_v2')) || [];
+    let stockList = JSON.parse(localStorage.getItem('stock_data_v2')) || [];
+
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clockDisplay').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, 1000);
+
+    function saveData() {
+      localStorage.setItem('invoices_data_v2', JSON.stringify(invoices));
+      localStorage.setItem('suppliers_data_v2', JSON.stringify(suppliers));
+      localStorage.setItem('staff_data_v2', JSON.stringify(staffList));
+      localStorage.setItem('stock_data_v2', JSON.stringify(stockList));
+    }
+
+    function openModule(moduleName) {
+      document.getElementById('mainDashboard').classList.add('hidden');
+      document.getElementById('moduleContent').classList.remove('hidden');
+      const title = document.getElementById('moduleTitle');
+      const body = document.getElementById('moduleBody');
+
+      if (moduleName === 'faturalar') {
+        title.innerText = '📜 Faturalar (Ara Toplam, KDV, İskonto)';
+        renderInvoicesView(body);
+      } else if (moduleName === 'cariler') {
+        title.innerText = '🏢 Tedarikçi Carileri & Ödeme Durumları';
+        renderSuppliersView(body);
+      } else if (moduleName === 'stoklar') {
+        title.innerText = '📦 Stok Yönetimi';
+        renderStockView(body);
+      } else if (moduleName === 'personel') {
+        title.innerText = '👥 Personel Listesi';
+        renderStaffView(body);
+      } else if (moduleName === 'maaslar') {
+        title.innerText = '💰 Maaş Takibi';
+        renderSalariesView(body);
+      } else if (moduleName === 'raporlar') {
+        title.innerText = '📊 Ay Sonu Gider Raporu';
+        renderReportsView(body);
+      } else if (moduleName === 'ayarlar') {
+        title.innerText = '⚙️ Gemini API Ayarları';
+        renderSettingsView(body);
+      }
+    }
+
+    function closeModule() {
+      document.getElementById('mainDashboard').classList.remove('hidden');
+      document.getElementById('moduleContent').classList.add('hidden');
+    }
+
+    // --- CARİLER & TEDARİKÇİLER ---
+    function renderSuppliersView(container) {
+      container.innerHTML = `
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-white/10 space-y-2">
+          <label class="font-bold text-white block">Yeni Tedarikçi Ekle (Örn: Kahveci, Sütçü):</label>
+          <div class="flex gap-2">
+            <input type="text" id="newSupInp" placeholder="Firma Adı" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+            <button onclick="addSupplier()" class="bg-blue-600 font-bold px-4 rounded-xl text-white">Ekle</button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <span class="font-bold text-slate-400 block">Tedarikçi Listesi ve Borç Durumları:</span>
+          <div id="supListContainer" class="space-y-2"></div>
+        </div>
+      `;
+      const list = document.getElementById('supListContainer');
+      suppliers.forEach((s, idx) => {
+        let supInvs = invoices.filter(i => i.firma === s);
+        let totalDebt = supInvs.reduce((acc, i) => acc + i.netTutar, 0);
+        let isAllPaid = supInvs.length > 0 && supInvs.every(i => i.isPaid);
+
+        list.innerHTML += `
+          <div class="bg-slate-800 p-3 rounded-xl border border-white/5 flex justify-between items-center">
+            <div>
+              <div class="font-bold text-white text-sm">🏢 ${s}</div>
+              <div class="text-[10px] text-amber-400">Toplam Borç: ${totalDebt.toFixed(2)} TL (${supInvs.length} Fatura)</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleAllSupplierPaid('${s}')" class="px-3 py-1 rounded-lg text-[10px] font-bold ${isAllPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-red-950 text-red-300 border border-red-500/30'}">
+                ${isAllPaid ? 'ÖDENDİ ✓' : 'ÖDENMEDİ'}
+              </button>
+              <button onclick="removeSupplier(${idx})" class="text-red-400 font-bold px-2">Sil</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addSupplier() {
+      const val = document.getElementById('newSupInp').value.trim();
+      if (val && !suppliers.includes(val)) {
+        suppliers.push(val);
+        saveData();
+        renderSuppliersView(document.getElementById('moduleBody'));
+      }
+    }
+
+    function removeSupplier(idx) {
+      suppliers.splice(idx, 1);
+      saveData();
+      renderSuppliersView(document.getElementById('moduleBody'));
+    }
+
+    function toggleAllSupplierPaid(supName) {
+      invoices.forEach(i => {
+        if (i.firma === supName) i.isPaid = !i.isPaid;
+      });
+      saveData();
+      renderSuppliersView(document.getElementById('moduleBody'));
+    }
+
+    // --- FATURALAR (KDV, İSKONTO, ARA TOPLAM) ---
+    function renderInvoicesView(container) {
+      container.innerHTML = `
+        <div class="bg-slate-800 p-3 rounded-2xl border border-white/10 space-y-3">
+          <span class="font-bold text-white block">Yeni Fatura Girişi & AI Tarama:</span>
+          
+          <div class="flex gap-2">
+            <input type="file" id="invImg" accept="image/*" class="hidden" onchange="scanInvoiceAI(event)">
+            <label for="invImg" class="w-full bg-pink-600 hover:bg-pink-700 py-2 rounded-xl text-white font-bold text-center cursor-pointer text-xs">
+              📸 Fatura Fotoğrafı Çek / Yükle (AI)
+            </label>
+          </div>
+          <p id="aiStatus" class="text-[10px] text-amber-400 text-center"></p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-400">Tedarikçi Firma:</label>
+              <select id="fFirma" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+                ${suppliers.map(s => `<option value="${s}">${s}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400">Ara Toplam (TL):</label>
+              <input type="number" id="fAra" placeholder="0.00" oninput="calcNet()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400">KDV (TL):</label>
+              <input type="number" id="fKdv" placeholder="0.00" oninput="calcNet()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400">İskonto / İndirim (TL):</label>
+              <input type="number" id="fIsk" placeholder="0.00" oninput="calcNet()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center bg-slate-900 p-3 rounded-xl border border-white/5">
+            <span class="text-slate-300 font-bold">Net Fatura Tutarı:</span>
+            <span id="fNetDisp" class="text-emerald-400 font-black text-sm">0.00 TL</span>
+          </div>
+
+          <button onclick="saveInvoiceManual()" class="w-full bg-indigo-600 font-bold py-2.5 rounded-xl text-white">Faturayı Kaydet</button>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <span class="font-bold text-slate-400 block">Kayıtlı Faturalar:</span>
+          <div id="invoiceListContainer" class="space-y-2"></div>
+        </div>
+      `;
+      renderInvoiceList();
+    }
+
+    function calcNet() {
+      let ara = Number(document.getElementById('fAra').value) || 0;
+      let kdv = Number(document.getElementById('fKdv').value) || 0;
+      let isk = Number(document.getElementById('fIsk').value) || 0;
+      let net = ara + kdv - isk;
+      document.getElementById('fNetDisp').innerText = net.toFixed(2) + ' TL';
+    }
+
+    function saveInvoiceManual() {
+      let firma = document.getElementById('fFirma').value;
+      let ara = Number(document.getElementById('fAra').value) || 0;
+      let kdv = Number(document.getElementById('fKdv').value) || 0;
+      let isk = Number(document.getElementById('fIsk').value) || 0;
+      let netTutar = ara + kdv - isk;
+
+      if (netTutar > 0) {
+        invoices.unshift({
+          id: Date.now(),
+          firma,
+          ara,
+          kdv,
+          isk,
+          netTutar,
+          tarih: new Date().toLocaleDateString(),
+          isPaid: false
+        });
+        saveData();
+        renderInvoiceList();
+        alert('✅ Fatura kaydedildi!');
+      } else {
+        alert('Lütfen geçerli tutarlar girin.');
+      }
+    }
+
+    function renderInvoiceList() {
+      const list = document.getElementById('invoiceListContainer');
+      if (!list) return;
+      list.innerHTML = '';
+      invoices.forEach(inv => {
+        list.innerHTML += `
+          <div class="bg-slate-800 p-3 rounded-xl border border-white/5 flex justify-between items-center">
+            <div>
+              <div class="font-bold text-white">🏢 ${inv.firma} <span class="text-[10px] text-slate-400">(${inv.tarih})</span></div>
+              <div class="text-[10px] text-slate-300">Ara: ${inv.ara}₺ | KDV: ${inv.kdv}₺ | İsk: ${inv.isk}₺</div>
+              <div class="text-xs font-black text-emerald-400">Net: ${inv.netTutar.toFixed(2)} TL</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleInvPaid(${inv.id})" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${inv.isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-red-950 text-red-300 border border-red-500/30'}">
+                ${inv.isPaid ? 'ÖDENDİ' : 'ÖDENMEDİ'}
+              </button>
+              <button onclick="deleteInvoice(${inv.id})" class="text-red-400 font-bold">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function toggleInvPaid(id) {
+      let inv = invoices.find(i => i.id === id);
+      if (inv) {
+        inv.isPaid = !inv.isPaid;
+        saveData();
+        renderInvoiceList();
+      }
+    }
+
+    function deleteInvoice(id) {
+      invoices = invoices.filter(i => i.id !== id);
+      saveData();
+      renderInvoiceList();
+    }
+
+    async function scanInvoiceAI(e) {
+      let file = e.target.files[0];
+      let apiKey = localStorage.getItem('gemini_api_key');
+      let status = document.getElementById('aiStatus');
+      if (!file || !apiKey) {
+        alert("Lütfen önce Ayarlar sekmesinden Gemini API Key girin!");
+        return;
+      }
+      status.innerText = "⏳ Fatura taranıyor...";
+      try {
+        let base64 = await toBase64(file);
+        let prompt = `Faturayı incele. Şu formatta saf JSON dön: {"firma": "Firma Adı", "ara": 0.0, "kdv": 0.0, "iskonto": 0.0}`;
+        let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: file.type, data: base64.split(',')[1] } }] }] })
+        });
+        let data = await res.json();
+        let cleaned = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        let parsed = JSON.parse(cleaned);
+
+        if (parsed.firma) {
+          let found = suppliers.find(s => s.toLowerCase() === parsed.firma.toLowerCase());
+          if (!found) {
+            suppliers.push(parsed.firma);
+            saveData();
+          }
+          document.getElementById('fFirma').value = found || parsed.firma;
+        }
+        document.getElementById('fAra').value = parsed.ara || 0;
+        document.getElementById('fKdv').value = parsed.kdv || 0;
+        document.getElementById('fIsk').value = parsed.iskonto || 0;
+        calcNet();
+        status.innerText = "✅ Fatura başarıyla okundu!";
+      } catch (err) {
+        status.innerText = "❌ Tarama başarısız oldu.";
+      }
+    }
+
+    // --- PERSONEL & MAAŞLAR ---
+    function renderStaffView(container) {
+      container.innerHTML = `
+        <div class="bg-slate-800 p-3 rounded-2xl border border-white/10 space-y-2">
+          <span class="font-bold text-white block">Yeni Personel Ekle:</span>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="stName" placeholder="Ad Soyad" class="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+            <input type="number" id="stSal" placeholder="Maaş (TL)" class="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+          </div>
+          <button onclick="addStaff()" class="w-full bg-amber-600 font-bold py-2 rounded-xl text-white">Personel Kaydet</button>
+        </div>
+        <div id="staffListContainer" class="space-y-2 pt-2"></div>
+      `;
+      renderStaffList();
+    }
+
+    function addStaff() {
+      let name = document.getElementById('stName').value.trim();
+      let salary = Number(document.getElementById('stSal').value) || 0;
+      if (name) {
+        staffList.push({ id: Date.now(), name, salary, paid: false });
+        saveData();
+        renderStaffList();
+      }
+    }
+
+    function renderStaffList() {
+      const list = document.getElementById('staffListContainer');
+      if (!list) return;
+      list.innerHTML = staffList.map(s => `
+        <div class="bg-slate-800 p-3 rounded-xl border border-white/5 flex justify-between items-center">
+          <div>
+            <div class="font-bold text-white">${s.name}</div>
+            <div class="text-[10px] text-amber-400">Maaş: ${s.salary.toFixed(2)} TL</div>
+          </div>
+          <button onclick="removeStaff(${s.id})" class="text-red-400 font-bold">Sil</button>
+        </div>
+      `).join('');
+    }
+
+    function removeStaff(id) {
+      staffList = staffList.filter(s => s.id !== id);
+      saveData();
+      renderStaffList();
+    }
+
+    function renderSalariesView(container) {
+      let totalSal = staffList.reduce((a,b)=>a+b.salary,0);
+      let unpaidSal = staffList.filter(s=>!s.paid).reduce((a,b)=>a+b.salary,0);
+
+      container.innerHTML = `
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <div class="bg-slate-800 p-3 rounded-xl text-center"><span class="text-[10px] text-slate-400 block">Toplam Maaş</span><b class="text-white">${totalSal} TL</b></div>
+          <div class="bg-red-950/40 p-3 rounded-xl text-center border border-red-500/20"><span class="text-[10px] text-red-400 block">Bekleyen</span><b class="text-red-300">${unpaidSal} TL</b></div>
+        </div>
+        <div class="space-y-2">
+          ${staffList.map(s => `
+            <div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center">
+              <div><b>${s.name}</b><br><small class="text-slate-400">${s.salary} TL</small></div>
+              <button onclick="s.paid=!s.paid;saveData();renderSalariesView(document.getElementById('moduleBody'));" class="px-3 py-1.5 rounded-lg text-xs font-bold ${s.paid?'bg-emerald-950 text-emerald-300':'bg-red-950 text-red-300'}">
+                ${s.paid?'ÖDENDİ ✓':'ÖDENMEDİ'}
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // --- STOK YÖNETİMİ ---
+    function renderStockView(container) {
+      container.innerHTML = `
+        <div class="bg-slate-800 p-3 rounded-2xl border border-white/10 space-y-2">
+          <span class="font-bold text-white block">Yeni Ürün Ekle:</span>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="skName" placeholder="Ürün Adı" class="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+            <input type="number" id="skQty" placeholder="Miktar" class="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white">
+          </div>
+          <button onclick="addStock()" class="w-full bg-purple-600 font-bold py-2 rounded-xl text-white">Ürün Ekle</button>
+        </div>
+        <div id="stockListContainer" class="space-y-2 pt-2"></div>
+      `;
+      renderStockList();
+    }
+
+    function addStock() {
+      let name = document.getElementById('skName').value.trim();
+      let qty = Number(document.getElementById('skQty').value) || 0;
+      if (name) {
+        stockList.push({ id: Date.now(), name, qty });
+        saveData();
+        renderStockList();
+      }
+    }
+
+    function renderStockList() {
+      const list = document.getElementById('stockListContainer');
+      if (!list) return;
+      list.innerHTML = stockList.map(st => `
+        <div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center">
+          <div><b>${st.name}</b><br><small class="text-purple-400">Adet/Miktar: ${st.qty}</small></div>
+          <button onclick="stockList=stockList.filter(x=>x.id!==${st.id});saveData();renderStockList();" class="text-red-400 font-bold">Sil</button>
+        </div>
+      `).join('');
+    }
+
+    // --- RAPORLAR ---
+    function renderReportsView(container) {
+      let totInv = invoices.reduce((a,b)=>a+b.netTutar,0);
+      let totSal = staffList.reduce((a,b)=>a+b.salary,0);
+      container.innerHTML = `
+        <div class="space-y-3">
+          <div class="bg-slate-800 p-3 rounded-xl flex justify-between"><span>Toplam Fatura Gideri:</span><b class="text-pink-400">${totInv.toFixed(2)} TL</b></div>
+          <div class="bg-slate-800 p-3 rounded-xl flex justify-between"><span>Toplam Maaş Gideri:</span><b class="text-amber-400">${totSal.toFixed(2)} TL</b></div>
+          <div class="bg-indigo-950 p-4 rounded-xl flex justify-between border border-indigo-500/30 font-bold text-sm"><span>AYLIK TOPLAM GİDER:</span><span class="text-emerald-400">${(totInv+totSal).toFixed(2)} TL</span></div>
+        </div>
+      `;
+    }
+
+    // --- AYARLAR ---
+    function renderSettingsView(container) {
+      let key = localStorage.getItem('gemini_api_key') || '';
+      container.innerHTML = `
+        <div class="bg-slate-800 p-4 rounded-2xl border border-white/10 space-y-3">
+          <label class="font-bold text-white block">Gemini API Key:</label>
+          <input type="password" id="apiKeyInp" value="${key}" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white">
+          <button onclick="localStorage.setItem('gemini_api_key', document.getElementById('apiKeyInp').value.trim()); alert('Kaydedildi!');" class="w-full bg-emerald-600 font-bold py-2.5 rounded-xl text-white">Kaydet</button>
+        </div>
+      `;
+    }
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+  </script>
+</body>
+</html>
