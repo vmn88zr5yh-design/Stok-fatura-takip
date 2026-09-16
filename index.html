@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS & Restoran Yönetim Sistemi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Gen AI SDK -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.run/@google/genai"
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0d102b;
+      color: #e2e8f0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .pos-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease-in-out;
+    }
+    .pos-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .pos-card:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 select-none">
+
+  <!-- Üst Bilgi Çubuğu -->
+  <header class="flex justify-between items-center bg-slate-900/60 p-3 rounded-2xl border border-white/10 mb-4 sm:mb-6">
+    <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Server</span> <span class="text-[10px] bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-300">ONLINE</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Internet</span> <span class="text-[10px] bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-300">ONLINE</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 text-right">
+      <div class="text-xs">
+        <div class="font-bold text-white tracking-wide">ALİ OSMAN BEY</div>
+        <div class="text-[10px] text-slate-400">YÖNETİCİ / ÖDEME NOKTASI</div>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-lg">
+        AO
+      </div>
+    </div>
+  </header>
+
+  <!-- ANA DASHBOARD -->
+  <main id="mainDashboard" class="flex-1 max-w-4xl mx-auto w-full flex flex-col justify-center my-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
+      <button onclick="openModule('faturalar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-105 transition text-2xl">📜</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Faturalar & AI Okuyucu</span>
+      </button>
+
+      <button onclick="openModule('cariler')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition text-2xl">🏢</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Tedarikçi Carileri</span>
+      </button>
+
+      <button onclick="openModule('stoklar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition text-2xl">📦</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Stok Sayımı</span>
+      </button>
+
+      <button onclick="openModule('personel')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-105 transition text-2xl">👥</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Personel Listesi</span>
+      </button>
+
+      <button onclick="openModule('maaslar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition text-2xl">💰</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Maaş Takibi</span>
+      </button>
+
+      <button onclick="openModule('raporlar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-pink-600 flex items-center justify-center shadow-lg shadow-fuchsia-500/30 group-hover:scale-105 transition text-2xl">📊</div>
+        <span class="font-bold text-xs sm:text-sm text-slate-200">Ay Sonu Raporu</span>
+      </button>
+
+      <button onclick="openModule('ayarlar')" class="pos-card rounded-3xl p-5 flex flex-col items-center justify-center gap-2 group col-span-2 sm:col-span-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-700 flex items-center justify-center shadow text-lg">⚙️</div>
+        <span class="font-bold text-xs text-slate-300">Gemini AI API Key Ayarları</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- MODÜL İÇERİK EKRANI -->
+  <section id="moduleContent" class="hidden flex-1 max-w-4xl mx-auto w-full bg-slate-900/90 rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl flex flex-col">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+      <button onclick="closeModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-white/10">
+        ⬅️ Ana Menü
+      </button>
+      <h2 id="moduleTitle" class="text-sm sm:text-base font-bold text-white">Modül Başlığı</h2>
+    </div>
+    <div id="moduleBody" class="flex-1 overflow-y-auto space-y-4 text-xs"></div>
+  </section>
+
+  <!-- FATURA DETAY MODALI -->
+  <div id="invoiceModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-5 max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+        <h3 id="modalInvTitle" class="font-bold text-white text-sm">Fatura Detayları</h3>
+        <button onclick="closeInvoiceModal()" class="text-slate-400 hover:text-white font-bold text-base px-2">✕</button>
+      </div>
+      <div id="modalInvContent" class="flex-1 overflow-y-auto space-y-3 text-xs"></div>
+    </div>
+  </div>
+
+  <footer class="flex justify-between items-center text-[11px] text-slate-500 pt-3 border-t border-white/5">
+    <div>POS CENTURY v5.8 (SDK Destekli)</div>
+    <div id="clockDisplay" class="font-bold text-slate-400">--:--</div>
+  </footer>
+
+  <script type="module">
+    import { GoogleGenAI } from "@google/genai";
+
+    let invoices = JSON.parse(localStorage.getItem('invoices_data_v18')) || [];
+    let suppliers = JSON.parse(localStorage.getItem('suppliers_data_v18')) || ['İzze Kahve', 'Orka Akademi', 'Leonaza Gıda'];
+    let staffList = JSON.parse(localStorage.getItem('staff_data_v18')) || [];
+    let stockList = JSON.parse(localStorage.getItem('stock_data_v18')) || [];
+
+    setInterval(() => {
+      const now = new Date();
+      const clockEl = document.getElementById('clockDisplay');
+      if(clockEl) clockEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, 1000);
+
+    function saveData() {
+      localStorage.setItem('invoices_data_v18', JSON.stringify(invoices));
+      localStorage.setItem('suppliers_data_v18', JSON.stringify(suppliers));
+      localStorage.setItem('staff_data_v18', JSON.stringify(staffList));
+      localStorage.setItem('stock_data_v18', JSON.stringify(stockList));
+    }
+
+    function formatTL(num) {
+      return Number(num || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+    }
+
+    window.openModule = function(moduleName) {
+      document.getElementById('mainDashboard').classList.add('hidden');
+      document.getElementById('moduleContent').classList.remove('hidden');
+      const title = document.getElementById('moduleTitle');
+      const body = document.getElementById('moduleBody');
+
+      if (moduleName === 'faturalar') {
+        title.innerText = '📜 Yapay Zeka Fatura Tarayıcı';
+        renderInvoicesView(body);
+      } else if (moduleName === 'cariler') {
+        title.innerText = '🏢 Tedarikçi Carileri & Borçlar';
+        renderSuppliersView(body);
+      } else if (moduleName === 'stoklar') {
+        title.innerText = '📦 Stok Yönetimi';
+        renderStockView(body);
+      } else if (moduleName === 'personel') {
+        title.innerText = '👥 Personel Listesi';
+        renderStaffView(body);
+      } else if (moduleName === 'maaslar') {
+        title.innerText = '💰 Maaş Takibi';
+        renderSalariesView(body);
+      } else if (moduleName === 'raporlar') {
+        title.innerText = '📊 Ay Sonu Gider Raporu';
+        renderReportsView(body);
+      } else if (moduleName === 'ayarlar') {
+        title.innerText = '⚙️ Gemini AI API Key Ayarları';
+        renderSettingsView(body);
+      }
+    };
+
+    window.closeModule = function() {
+      document.getElementById('mainDashboard').classList.remove('hidden');
+      document.getElementById('moduleContent').classList.add('hidden');
+    };
+
+    function renderInvoicesView(container) {
+      container.innerHTML = `
+        <div class="bg-slate-800 p-4 rounded-2xl border border-white/10 space-y-3">
+          <span class="font-bold text-white block text-sm">📸 AI Fatura Fotoğrafı Yükle:</span>
+          <p class="text-[11px] text-slate-400">Yüklediğiniz faturayı yapay zeka SDK üzerinden güvenle analiz eder.</p>
+          
+          <input type="file" id="invImg" accept="image/*" class="hidden">
+          <label for="invImg" class="w-full bg-pink-600 hover:bg-pink-700 py-3 rounded-xl text-white font-bold text-center cursor-pointer block text-xs shadow-lg shadow-pink-600/30">
+            Fatura Fotoğrafı Seç / Tara
+          </label>
+          <p id="aiStatus" class="text-xs text-amber-400 text-center font-semibold"></p>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <span class="font-bold text-slate-400 block">Kayıtlı Faturalar (İçeriğini görmek için tıkla):</span>
+          <div id="invoiceListContainer" class="space-y-2"></div>
+        </div>
+      `;
+      renderInvoiceList();
+
+      document.getElementById('invImg').addEventListener('change', async (e) => {
+        let file = e.target.files[0];
+        let apiKey = localStorage.getItem('gemini_api_key');
+        let status = document.getElementById('aiStatus');
+        if (!file) return;
+
+        if (!apiKey) {
+          alert("Lütfen önce Ana Menüden 'Gemini AI API Key Ayarları' kısmına API anahtarınızı girin!");
+          window.openModule('ayarlar');
+          return;
+        }
+
+        status.innerText = "⏳ Yapay zeka faturayı analiz ediyor...";
+
+        try {
+          const ai = new GoogleGenAI({ apiKey: apiKey });
+          let base64Data = await toBase64(file);
+          let base64Content = base64Data.split(',')[1];
+
+          let prompt = `Bu e-fatura veya irsaliye görselini dikkatlice incele. Şirket adını, ürünleri, miktar, birim fiyat ve toplam tutarları eksiksiz oku. Kesinlikle şu formatta saf JSON olarak dön (markdown veya ekstra yazı ekleme):
+          {
+            "firma": "Satıcı şirket adı",
+            "tarih": "YYYY-MM-DD",
+            "kalemler": [
+              { "ad": "Ürün adı ve açıklaması", "miktar": 1, "birimFiyat": 0.0, "toplamTutar": 0.0 }
+            ],
+            "malHizmetToplami": 0.0,
+            "genelToplam": 0.0
+          }`;
+
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: file.type,
+                  data: base64Content
+                }
+              }
+            ]
+          });
+
+          let rawText = response.text();
+          let cleaned = rawText.replace(/```json/g, '').replace(/
