@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akıllı Stok ve Fatura Takip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 p-4">
+  <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden p-6 space-y-6">
+    
+    <!-- Başlık -->
+    <div class="text-center border-b pb-4">
+      <h1 class="text-2xl font-bold text-slate-900">📦 Akıllı Stok & Fatura</h1>
+      <p class="text-sm text-slate-500 mt-1">Fatura Görseli Taramalı Stok Takibi</p>
+    </div>
+
+    <!-- API Key Girişi & Kaydetme -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
+      <label class="block text-xs font-semibold text-amber-800">Gemini API Anahtarınız:</label>
+      <div class="flex gap-2">
+        <input type="password" id="apiKeyInput" placeholder="AI Studio API Key Yapıştırın" class="w-full text-xs p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <button onclick="saveApiKey()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1 text-xs rounded-lg shadow">Kaydet</button>
+      </div>
+      <p id="apiStatus" class="text-[10px] text-amber-700"></p>
+    </div>
+
+    <!-- Kamera / Fatura Yükleme -->
+    <div class="border-2 border-dashed border-blue-400 bg-blue-50/50 rounded-2xl p-6 text-center">
+      <input type="file" id="invoiceInput" accept="image/*" capture="environment" class="hidden" onchange="handleInvoiceUpload(event)">
+      <label for="invoiceInput" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl cursor-pointer shadow-lg shadow-blue-500/30 inline-flex items-center gap-2">
+        <span>📸 Fatura Çek / Yükle</span>
+      </label>
+      <p id="statusText" class="text-xs text-slate-500 mt-3">Kamerayla faturayı çekin veya galeriden yükleyin.</p>
+    </div>
+
+    <!-- Stok Listesi -->
+    <div>
+      <h2 class="text-lg font-bold text-slate-800 mb-3">📋 Güncel Stok Listesi</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+            <tr>
+              <th class="p-2">Ürün Adı</th>
+              <th class="p-2 text-center">Adet</th>
+              <th class="p-2 text-right">Fiyat</th>
+            </tr>
+          </thead>
+          <tbody id="stockTable" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="3" class="p-4 text-center text-slate-400 text-xs">Henüz eklenmiş ürün yok.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentStock = [];
+
+    window.onload = function() {
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) {
+        document.getElementById('apiKeyInput').value = savedKey;
+        document.getElementById('apiStatus').innerText = "✅ API Anahtarı kayıtlı.";
+      }
+    };
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        document.getElementById('apiStatus').innerText = "✅ API Anahtarı başarıyla kaydedildi.";
+      } else {
+        alert("Lütfen geçerli bir anahtar girin.");
+      }
+    }
+
+    async function handleInvoiceUpload(event) {
+      const file = event.target.files[0];
+      const apiKey = localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
+      const statusText = document.getElementById('statusText');
+
+      if (!file) return;
+      if (!apiKey) {
+        alert("Lütfen önce Gemini API anahtarınızı girip 'Kaydet' butonuna basın!");
+        return;
+      }
+
+      statusText.innerText = "⏳ Fatura AI tarafından taranıyor...";
+      statusText.className = "text-xs text-blue-600 font-semibold mt-3 animate-pulse";
+
+      try {
+        const base64 = await toBase64(file);
+        const base64Data = base64.split(',')[1];
+
+        const prompt = `Bu faturadaki ürünleri incele. Faturada yer alan ürünlerin isimlerini, miktarlarını ve birim fiyatlarını bul. 
+        Yanıtı SADECE ve SADECE saf JSON formatında ver. Metin açıklaması veya markdown işareti ekleme. 
+        Format tam olarak şu şekilde olsun:
+        [{"urun": "Ürün Adı", "miktar": 10, "fiyat": 50.5}]`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inline_data: { mime_type: file.type, data: base64Data } }
+              ]
+            }]
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error.message || "API Hatası");
+        }
+
+        const rawText = data.candidates[0].content.parts[0].text;
+        const cleanedText = rawText.replace(/```json|```/g, '').trim();
+        const items = JSON.parse(cleanedText);
+
+        updateStock(items);
+        statusText.innerText = "✅ Fatura başarıyla tarandı ve stoğa eklendi!";
+        statusText.className = "text-xs text-green-600 font-semibold mt-3";
+      } catch (err) {
+        console.error(err);
+        statusText.innerText = "❌ Hata: " + (err.message || "Fatura okunamadı.");
+        statusText.className = "text-xs text-red-600 font-semibold mt-3";
+      }
+    }
+
+    function updateStock(newItems) {
+      newItems.forEach(item => {
+        const existing = currentStock.find(s => s.urun.toLowerCase() === item.urun.toLowerCase());
+        if (existing) {
+          existing.miktar += Number(item.miktar);
+          existing.fiyat = item.fiyat;
+        } else {
+          currentStock.push({ urun: item.urun, miktar: Number(item.miktar), fiyat: Number(item.fiyat) });
+        }
+      });
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('stockTable');
+      tbody.innerHTML = '';
+      currentStock.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50">
+            <td class="p-2 font-medium">${item.urun}</td>
+            <td class="p-2 text-center bg-blue-50 font-bold text-blue-700 rounded">${item.miktar}</td>
+            <td class="p-2 text-right">${item.fiyat} TL</td>
+          </tr>
+        `;
+      });
+    }
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+  </script>
+</body>
+</html>
